@@ -5,6 +5,7 @@ import {
   ActivityIndicator,
   Dimensions,
   Modal,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -42,24 +43,26 @@ export default function StoreSelectorScreen() {
   const [selectedStore, setSelectedStore] = useState<Store | null>(null);
   const [showModal, setShowModal] = useState(false);
 
+  // Always call hooks unconditionally
   useEffect(() => {
-    (async () => {
-      const { status } = await Location.requestForegroundPermissionsAsync();
-      if (status !== "granted") {
-        alert("Permission to access location was denied");
-        return;
-      }
+    if (Platform.OS !== "web") {
+      (async () => {
+        const { status } = await Location.requestForegroundPermissionsAsync();
+        if (status !== "granted") {
+          alert("Permission to access location was denied");
+          return;
+        }
 
-      const location = await Location.getCurrentPositionAsync({});
-      setUserLocation({
-        latitude: location.coords.latitude,
-        longitude: location.coords.longitude,
-      });
-    })();
+        const location = await Location.getCurrentPositionAsync({});
+        setUserLocation({
+          latitude: location.coords.latitude,
+          longitude: location.coords.longitude,
+        });
+      })();
+    }
   }, []);
 
   const confirmStore = () => {
-    console.log("Confirmed store:", selectedStore);
     setShowModal(false);
     router.push({
       pathname: "/store-products",
@@ -71,6 +74,19 @@ export default function StoreSelectorScreen() {
     });
   };
 
+  // Web fallback: show iframe Google Map instead of native map
+  if (Platform.OS === "web") {
+    return (
+      <View style={styles.container}>
+        <iframe
+          src="https://www.google.com/maps/search/?api=1&query=Lowes+near+Athens,+GA"
+          style={{ width: "100%", height: "100%", border: 0 }}
+        />
+      </View>
+    );
+  }
+
+  // Native: show loader until location is ready
   if (!userLocation) {
     return (
       <View style={styles.loader}>
