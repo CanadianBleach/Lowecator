@@ -84,15 +84,18 @@ const styles = StyleSheet.create({
     right: -5,
     backgroundColor: "red",
     borderRadius: 10,
-    width: 20,
-    height: 20,
+    minWidth: 18,
+    height: 18,
+    paddingHorizontal: 4,
     justifyContent: "center",
     alignItems: "center",
   },
   cartBadgeText: {
     color: "white",
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: "bold",
+    textAlign: "center",
+    lineHeight: 14, // key for vertical centering
   },
   cartButton: {
     position: "absolute",
