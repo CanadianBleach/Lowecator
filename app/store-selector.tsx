@@ -1,34 +1,46 @@
-import React from "react";
-import {
-    Dimensions,
-    Platform,
-    StyleSheet,
-    View
-} from "react-native";
-import { WebView } from "react-native-webview";
-
-const stores = [
-  { id: "1", name: "Lowe’s Downtown", lat: 37.78825, lng: -122.4324 },
-  { id: "2", name: "Lowe’s Midtown", lat: 37.75825, lng: -122.4624 },
-];
+import * as Location from 'expo-location';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, Platform, StyleSheet, View } from 'react-native';
+import { WebView } from 'react-native-webview';
 
 export default function StoreSelectorScreen() {
-  const mapHeight = Dimensions.get("window").height * 0.6;
-  const apiKey = process.env.EXPO_PUBLIC_GOOGLE_MAPS_API_KEY;
-  const mapUrl = `https://www.google.com/maps/search/?api=1&query=${stores[0].lat},${stores[0].lng}`;
+  const [mapUrl, setMapUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      const { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        alert('Permission to access location was denied');
+        return;
+      }
+
+      const location = await Location.getCurrentPositionAsync({});
+      const { latitude, longitude } = location.coords;
+
+      const url = `https://www.google.com/maps/search/?api=1&query=Lowes&query_place_id=&center=${latitude},${longitude}`;
+      setMapUrl(url);
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading || !mapUrl) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
-      {Platform.OS === "web" ? (
+      {Platform.OS === 'web' ? (
         <iframe
           src={mapUrl}
-          style={{ width: "100%", height: "100%", border: 4 }}
+          style={{ width: '100%', height: '100%', border: 0 }}
         />
       ) : (
-        <WebView
-          source={{ uri: mapUrl }}
-          style={{ width: "100%", height: mapHeight }}
-        />
+        <WebView source={{ uri: mapUrl }} style={{ width: '100%', height: '100%' }} />
       )}
     </View>
   );
@@ -37,15 +49,11 @@ export default function StoreSelectorScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    height: '100%',
   },
-  list: {
-    backgroundColor: "#fff",
-    padding: 16,
-  },
-  item: {
-    paddingVertical: 10,
-    fontSize: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
