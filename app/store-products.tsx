@@ -1,32 +1,51 @@
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { useLocalSearchParams } from "expo-router";
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { WebView } from "react-native-webview";
 
 export default function StoreProductsScreen() {
-  const { name, lat, lng } = useLocalSearchParams();
-
   return (
-    <ThemedView style={styles.container}>
-      <ThemedText type="title" style={styles.title}>
-        {name}
-      </ThemedText>
-      <ThemedText>Latitude: {lat}</ThemedText>
-      <ThemedText>Longitude: {lng}</ThemedText>
-      <ThemedText style={{ marginTop: 20 }}>Products coming soon...</ThemedText>
-    </ThemedView>
+    <View style={styles.container}>
+      <WebView
+        source={{ uri: "https://www.lowes.com/" }}
+        style={styles.webview}
+        startInLoadingState
+        javaScriptEnabled
+      />
+
+      <TouchableOpacity
+        style={styles.saveButton}
+        onPress={() => console.log("Save Item button pressed")}
+      >
+        <Text style={styles.buttonText}>Save Item</Text>
+      </TouchableOpacity>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  webview: {
+    flex: 1,
+  },
+  saveButton: {
+    position: "absolute",
+    bottom: 8,
+    right: 15,
+    backgroundColor: "#1e90ff",
+    paddingVertical: 14,
+    paddingHorizontal: 24,
+    borderRadius: 10,
+    zIndex: 10,
+    elevation: 5,
+    width: 237,
+    height: 50,
     justifyContent: "center",
     alignItems: "center",
   },
-  title: {
-    fontSize: 24,
+  buttonText: {
+    color: "white",
     fontWeight: "bold",
-    marginBottom: 10,
+    fontSize: 18,
   },
 });
